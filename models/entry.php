@@ -128,7 +128,7 @@ class Entry extends MiWriteAppModel {
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
-		)
+		),
 		'Category' => array(
 			'className' => 'MiTags.Tag',
 			'conditions' => array(
@@ -177,9 +177,9 @@ class Entry extends MiWriteAppModel {
 		$params = array_merge(array(
 			'conditions' => $conditions,
 			'order' => 'Tag.lft'
-		), $params;
+		), $params);
 
-		return MiCache::('MiTags.Tag', 'find', 'list', $params);
+		return MiCache::data('MiTags.Tag', 'find', 'list', $params);
 	}
 
 /**
