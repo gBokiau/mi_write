@@ -46,7 +46,7 @@ class Page extends MiWriteAppModel {
  * @access public
  */
 	public $actsAs = array(
-		'Media.MediaFields' => array(
+		/*'Media.MediaFields' => array(
 			'fields' => array(
 				'icon',
 				'media' => array(
@@ -54,25 +54,25 @@ class Page extends MiWriteAppModel {
 					'mime_type' => 'media_type',
 				)
 			),
-		),
+		),*/
 		'Mi.AutoFormat' => array(
 			'fields' => array(
 				'body',
 				'intro'
 			)
 		),
-		'Mi.List' => array(
+		/*'Mi.List' => array(
 			'sequence' => 'page_number',
 			'scope' => array(
 				'model',
 				'foreign_id'
 			)
-		),
-		'Mi.RestrictSite',
+		),*/
+		//'Mi.RestrictSite',
 		'Mi.Slugged' => array(
 			'label' => 'title'
 		),
-		'MiEnums.Enum' => array(
+		/*'MiEnums.Enum' => array(
 			'fields' => array(
 				'auto_intro',
 				'layout'
@@ -83,7 +83,7 @@ class Page extends MiWriteAppModel {
 			'linkModel' => 'TagLink',
 			'newTags' => true,
 			'format' => false,
-		),
+		),*/
 	);
 
 /**
@@ -101,11 +101,11 @@ class Page extends MiWriteAppModel {
  * @access public
  */
 	public $validate = array(
-		'site_id' => array(
+		/*'site_id' => array(
 			'notempty' => array(
 				'rule' => array('notempty'),
 			),
-		),
+		),*/
 		'user_id' => array(
 			'notempty' => array(
 				'rule' => array('notempty'),
@@ -144,16 +144,21 @@ class Page extends MiWriteAppModel {
  * @access public
  */
 	public $belongsTo = array(
-		'Site' => array(
+		/**'Site' => array(
 			'className' => 'Site',
-		),
+		),*/
 		'User' => array(
 			'className' => 'User',
 		),
-		'Entry' => array(
-			'className' => 'MiWrite.Entry',
+		'Update' => array(
+			'className' => 'Update',
 			'foreignKey' => 'foreign_id',
-			'conditions' => array('Page.model' => 'Entry'),
+			'conditions' => array('Page.model' => 'Update'),
+		),
+		'Event' => array(
+			'className' => 'Event',
+			'foreignKey' => 'foreign_id',
+			'conditions' => array('Page.model' => 'Event'),
 		)
 	);
 
@@ -305,7 +310,9 @@ class Page extends MiWriteAppModel {
 			$this->id = $page['Page']['id'];
 			$this->save($page);
 		}
-		$this->ClassRegistry::init('MiTags.Tag')->updateCounters();
+		/** todo
+		* $this->ClassRegistry::init('MiTags.Tag')->updateCounters();
+		*/
 	}
 
 /**
