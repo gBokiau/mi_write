@@ -48,7 +48,8 @@ class Entry extends MiWriteAppModel {
 		'Mi.RestrictSite',
 		'MiEnums.Enum' => array(
 			'fields' => array('comment_policy', 'status')
-		)
+		),
+		'MiWrite.HasPage'
 	);
 
 /**
@@ -220,24 +221,5 @@ class Entry extends MiWriteAppModel {
 			$return = $this->find('list', compact('conditions', 'page', 'limit'));
 		}
 		return $return;
-	}
-
-/**
- * findList method
- *
- * Override recursive to ensure the page title can be found
- *
- * @param mixed $state
- * @param mixed $query
- * @param array $results array()
- * @return void
- * @access protected
- */
-	function _findList($state, $query, $results = array()) {
-		if ($state == 'before' && !isset($query['fields'])) {
-			$query['fields'] = array('Entry.id', 'Page.title');
-			$query['recursive'] = 0;
-		}
-		return parent::_findList($state, $query, $results);
 	}
 }
