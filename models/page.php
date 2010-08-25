@@ -54,14 +54,14 @@ class Page extends MiWriteAppModel {
 					'mime_type' => 'media_type',
 				)
 			),
-		),*/
+		),
 		'Mi.AutoFormat' => array(
 			'fields' => array(
 				'body',
 				'intro'
 			)
 		),
-		/*'Mi.List' => array(
+		'Mi.List' => array(
 			'sequence' => 'page_number',
 			'scope' => array(
 				'model',
