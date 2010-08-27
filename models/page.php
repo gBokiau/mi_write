@@ -69,7 +69,7 @@ class Page extends MiWriteAppModel {
 			)
 		),*/
 		//'Mi.RestrictSite',
-		'Mi.Slugged' => array(
+		'MiWrite.Slugged' => array(
 			'label' => 'title'
 		),
 		/*'MiEnums.Enum' => array(
