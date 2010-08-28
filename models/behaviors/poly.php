@@ -144,26 +144,8 @@ class PolyBehavior extends ModelBehavior {
 		return $results;
 	}
 
-/*
- * display method
- *
- * Fall back. Assumes that find list is setup such that it returns users real names
- *
- * @param mixed $id
- * @return string
- * @access public
-
-	function display(&$Model, $id = null) {
-		if (!$id) {
-			if (!$Model->id) {
-				return false;
-			}
-			$id = $Model->id;
-		}
-		return current($Model->find('list', array('conditions' => array($Model->alias . '.' . $Model->primaryKey => $id))));
-	} */
 	private function __getModels() {
-		if ($this->models) {
+		if (!$this->models) {
 			$models = App::objects('model');
 			$plugins = App::objects('plugin');
 			if (!empty($plugins)) {
