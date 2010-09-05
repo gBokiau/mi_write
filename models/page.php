@@ -150,7 +150,7 @@ class Page extends MiWriteAppModel {
 		'User' => array(
 			'className' => 'User',
 		),
-		'Update' => array(
+		/*'Update' => array(
 			'className' => 'Update',
 			'foreignKey' => 'foreign_id',
 			'conditions' => array('Page.model' => 'Update'),
@@ -159,7 +159,7 @@ class Page extends MiWriteAppModel {
 			'className' => 'Event',
 			'foreignKey' => 'foreign_id',
 			'conditions' => array('Page.model' => 'Event'),
-		)
+		)*/
 	);
 
 /**
