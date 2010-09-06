@@ -144,9 +144,6 @@ class Page extends MiWriteAppModel {
  * @access public
  */
 	public $belongsTo = array(
-		/**'Site' => array(
-			'className' => 'Site',
-		),*/
 		'User' => array(
 			'className' => 'User',
 		),
