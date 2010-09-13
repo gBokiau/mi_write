@@ -13,9 +13,11 @@ class HasPageBehavior extends ModelBehavior {
 	//	if (!isset($this->runtime[$Model->alias])) {
 	//		$this->runtime[$Model->alias] = am(array('display' => ''), $settings);
 	//	}
-	
-		$Model->displayField = 'display';
-		$Model->virtualFields['display'] = 'Page.title';
+		if($Model->displayField == 'id') {
+			$Model->displayField = 'display';
+			$Model->virtualFields['display'] = 'Page.title';
+		}
+
 		if (!isset($Model->hasOne['Page'])) {
 			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions'=>array('Page.model'=>$Model->name)), $settings);
 			$Model->bindModel(array('hasOne' => array('Page'=>$pageRelationship)), false);
