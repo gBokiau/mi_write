@@ -167,32 +167,32 @@ class Page extends MiWriteAppModel {
  * @param $options array Options passed from model::save(), see $options of model::save().
  * @access public
  * @link          http://book.cakephp.org/view/682/beforeValidate
- */
-	public function beforeValidate($options = array()) {
-		if (!empty($this->data[$this->alias]['body']) && (!$this->id || !empty($this->data[$this->alias]['auto_intro']))) {
-			App::import('Core', 'Helper');
-			App::import('Helper', 'Text');
-			$this->data[$this->alias]['intro'] = TextHelper::truncate(
-				preg_replace('@<img.*>@U', '', $this->data[$this->alias]['body']),
-				400,
-				array('exact' => false, 'html' => true)
-			);
-			if (empty($this->data[$this->alias]['meta_title'])) {
-				$this->data[$this->alias]['meta_title'] = $this->data[$this->alias]['title'];
-			}
-			if (empty($this->data[$this->alias]['meta_description'])) {
-				$this->data[$this->alias]['meta_description'] = trim(strip_tags($this->data[$this->alias]['intro']));
-			}
-		}
-		/*
-		if (!empty($this->data[$this->alias]['serialized']) && is_array($this->data[$this->alias]['serialized'])) {
-			$this->data[$this->alias]['serialized'] = serialize($this->data[$this->alias]['serialized']);
-		}
-		*/
-		return true;
-	}
-
-/**
+ *
+ *  public function beforeValidate($options = array()) {
+ *  	if (!empty($this->data[$this->alias]['body']) && (!$this->id || !empty($this->data[$this->alias]['auto_intro']))) {
+ *  		App::import('Core', 'Helper');
+ *  		App::import('Helper', 'Text');
+ *  		$this->data[$this->alias]['intro'] = TextHelper::truncate(
+ *  			preg_replace('@<img.*>@U', '', $this->data[$this->alias]['body']),
+ *  			400,
+ *  			array('exact' => false, 'html' => true)
+ *  		);
+ *  		if (empty($this->data[$this->alias]['meta_title'])) {
+ *  			$this->data[$this->alias]['meta_title'] = $this->data[$this->alias]['title'];
+ *  		}
+ *  		if (empty($this->data[$this->alias]['meta_description'])) {
+ *  			$this->data[$this->alias]['meta_description'] = trim(strip_tags($this->data[$this->alias]['intro']));
+ *  		}
+ *  	}
+ *  	
+ *  //	if (!empty($this->data[$this->alias]['serialized']) && is_array($this->data[$this->alias]['serialized'])) {
+ *  //		$this->data[$this->alias]['serialized'] = serialize($this->data[$this->alias]['serialized']);
+ *  //	}
+ *  	
+ *  	return true;
+ *  }
+ *
+ *
  * pageList method
  *
  * @param mixed $model null
