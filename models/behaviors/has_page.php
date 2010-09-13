@@ -20,11 +20,19 @@ class HasPageBehavior extends ModelBehavior {
 
 		if (!isset($Model->hasOne['Page'])) {
 			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions'=>array('Page.model'=>$Model->name)), $settings);
+			$this->runtime[$Model->alias] = $pageRelationship;
 			$Model->bindModel(array('hasOne' => array('Page'=>$pageRelationship)), false);
 
 		}
 	}
 	function beforeFind(&$model, $query) {
+		if ($model->Behaviors->enabled('Translate')) {
+			$pageRelationship = $this->runtime[$model->alias];
+			$locale = isset($model->locale) ? $model->locale : Configure::read('Config.locale');
+			$pageRelationship['conditions']['Page.locale'] = $locale;
+			$model->bindModel(array('hasOne' => array('Page'=>$pageRelationship)), false);
+				
+		}
 		if ($model->findQueryType == 'list') { 
 			if($model->isVirtualField($query['fields'][1])) {
 				$model->Behaviors->attach('Containable');
