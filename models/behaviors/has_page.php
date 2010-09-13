@@ -6,6 +6,7 @@ class HasPageBehavior extends ModelBehavior {
 			'foreignKey' => 'foreign_id',
 			'conditions' => array(
 				'Page.page_number' => 1,
+				'Page.locale' => 'eng'
 			),
 	);
 	function setup(&$Model, $settings = array()) {
