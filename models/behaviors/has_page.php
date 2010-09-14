@@ -4,10 +4,7 @@ class HasPageBehavior extends ModelBehavior {
 	var $_defaultSettings = array(
 			'className' => 'MiWrite.Page',
 			'foreignKey' => 'foreign_id',
-			'conditions' => array(
-				'Page.page_number' => 1,
-				'Page.locale' => 'eng'
-			),
+			'conditions' => array(),
 	);
 	function setup(&$Model, $settings = array()) {
 	//	if (!isset($this->runtime[$Model->alias])) {
@@ -19,11 +16,14 @@ class HasPageBehavior extends ModelBehavior {
 		}
 
 		if (!isset($Model->hasOne['Page'])) {
-			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions'=>array('Page.model'=>$Model->name)), $settings);
+			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array('Page.page_number' => 1, 'Page.model'=>$Model->name)), $settings);
 			$this->runtime[$Model->alias] = $pageRelationship;
 			$Model->bindModel(array('hasOne' => array('Page'=>$pageRelationship)), false);
-
 		}
+		if (!isset($Model->hasMany['Translations'])) {
+			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array('Translation.model' => $Model->name)), $settings);
+			$Model->bindModel(array('hasMany' => array('Translation'=>$pageRelationship)), false);
+		}		
 	}
 	function beforeFind(&$model, $query) {
 		if ($model->Behaviors->enabled('Translate')) {
