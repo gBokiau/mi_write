@@ -26,7 +26,7 @@ class HasPageBehavior extends ModelBehavior {
 		}		
 	}
 	function beforeFind(&$model, $query) {
-		if ($model->Behaviors->enabled('Translate')) {
+		if (isset($model->translate) && $model->translate) {
 			$pageRelationship = $this->runtime[$model->alias];
 			$locale = isset($model->locale) ? $model->locale : Configure::read('Config.locale');
 			$pageRelationship['conditions']['Page.locale'] = $locale;
