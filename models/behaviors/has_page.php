@@ -54,16 +54,14 @@ class HasPageBehavior extends ModelBehavior {
 		return $query;
 	}
 	
-	function beforeSave(&$model, $created) {
-		if (isset($this->data['Page'])) {
-			$this->data['Page']['model'] = $model->alias;
-		} elseif(isset($this->data['Translation'])) {
-			foreach ($this->data['Translation'] as $i => $content) {
-				$this->data['Translation'][$i]['model'] = $model->alias;
+	function beforeValidate(&$model, $created) {
+		if (isset($model->data['Page'])) {
+			$model->data['Page']['model'] = $model->alias;
+		} elseif(isset($model->data['Translation'])) {
+			foreach ($model->data['Translation'] as $i => $content) {
+				$model->data['Translation'][$i]['model'] = $model->alias;
 			}
 		}
-		
-		
 	}
 	
 	//function display(&$model) {
