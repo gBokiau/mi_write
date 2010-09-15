@@ -54,12 +54,17 @@ class HasPageBehavior extends ModelBehavior {
 		return $query;
 	}
 	
-/*	function afterSave(&$model, $created) {
-		if ($model->id && isset($model->data['Page'])) {
-			$this->runtime[$model->alias]['display'] = $model->data['Page']['title'];
+	function beforeSave(&$model, $created) {
+		if (isset($this->data['Page'])) {
+			$this->data['Page']['model'] = $model->alias;
+		} elseif(isset($this->data['Translation'])) {
+			foreach ($this->data['Translation'] as $i => $content) {
+				$this->data['Translation'][$i]['model'] = $model->alias;
+			}
 		}
 		
-	}*/
+		
+	}
 	
 	//function display(&$model) {
 //		return $this->runtime[$model->alias]['display'];
