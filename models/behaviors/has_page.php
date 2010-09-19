@@ -133,7 +133,7 @@ class HasPageBehavior extends ModelBehavior {
 					$value = array();
 				}
 				if (in_array($key, array_keys($this->runtime))) {
-					$model->$key->findQueryType = count($value) ? 'all' : 'list';
+					$model->$key->findQueryType = (count($value) > 1) ? 'all' : 'list';
 					$query['contain'][$key] = $this->beforeFind(&$model->$key, $value, true);
 				}
 			}
@@ -141,24 +141,42 @@ class HasPageBehavior extends ModelBehavior {
 		if($isChild) {
 			$query = $query['contain'];
 		}
-		pr($query);
+	//	pr($query);
 		return $query;
 	}
 	function afterFind(&$model, $results, $primary) {
+		if (!in_array($model->alias, array_keys($this->runtime))) {
+			return $results;
+		}
 		$virtualFields = $this->runtime[$model->alias]['virtualFields'];
 		$languages = $this->runtime[$model->alias]['languages'];
 		$model->virtualFields = array_merge($model->virtualFields, $virtualFields);
 		if (!$languages || empty($results)) {//|| empty($this->runtime[$model->alias]['beforeFind'])
 			return $results;
 		}
+			
+		foreach($results as $i=>$result) {
+			if (is_array($result)) {
+				foreach($result as $key=>$value) {
+					if (is_array($value) && isset($model->$key) && is_object($model->$key)) {
+						$results[$i][$key] = $this->afterFind(&$model->$key, $value, false);
+					}
+				}
+			}
+		}
 		$locale = $this->getLocale(&$model);
+
 		foreach ($results as $i => $result) {
+			if(!is_array($result)) {
+				continue;
+			}
 			$found = false;
 			foreach ($locale as $_locale) {
 				$alias = 'Page_'.$_locale;
 				if(!isset($result[$alias])) {
 					continue;
 				}
+
 				$first = current($result[$alias]);
 				if ($first && !$found) {
 					$found = true;
@@ -183,7 +201,7 @@ class HasPageBehavior extends ModelBehavior {
 			
 		}
 		$fields = array_unique($this->runtime[$model->alias]['fields']);
-		
+
 		foreach($results as $i => $result) {
 			$found = false;
 			foreach ($fields as $_field => $_translations) {
@@ -196,7 +214,6 @@ class HasPageBehavior extends ModelBehavior {
 				}
 			}
 		}
-	
 		return $results;
 	}
 	function beforeValidate(&$model, $created) {
