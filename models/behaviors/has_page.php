@@ -7,49 +7,56 @@ class HasPageBehavior extends ModelBehavior {
 			'foreignKey' => 'foreign_id',
 			'conditions' => array(),
 	);
-	function setup(&$Model, $settings = array()) {
-	//	if (!isset($this->runtime[$Model->alias])) {
-	//		$this->runtime[$Model->alias] = am(array('display' => ''), $settings);
+	function setup(&$model, $settings = array()) {
+	//	if (!isset($this->runtime[$model->alias])) {
+	//		$this->runtime[$model->alias] = am(array('display' => ''), $settings);
 	//	}
-		if ($Model->displayField == 'id') {
-			$Model->displayField = 'display';
-			$Model->virtualFields['display'] = 'Page.title';
+		if ($model->displayField == 'id') {
+			$model->displayField = 'display';
+			$model->virtualFields['display'] = 'Page.title';
 		}
 
+		$this->runtime[$model->alias] = array();
 		if(isset($settings['languages'])) {
-			$this->languages = $settings['languages'];
+			$this->runtime[$model->alias]['languages'] = $settings['languages'];
 			unset($settings['languages']);
+		} else {
+			$this->runtime[$model->alias]['languages'] = false;
 		}
-		$this->runtime[$Model->alias] = array();
-		if (!isset($Model->hasOne['Page']) & !$this->languages) {
-			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array('Page.page_number' => 1, 'Page.model'=>$Model->name)), $settings);
-			$this->runtime[$Model->alias]['Page'] = $pageRelationship;
-			$Model->bindModel(array('hasOne' => array('Page'=>$pageRelationship)), false);
+
+		if (!isset($model->hasOne['Page']) & !$this->runtime[$model->alias]['languages']) {
+			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array('Page.page_number' => 1, 'Page.model'=>$model->name)), $settings);
+			$this->runtime[$model->alias]['Page'] = $pageRelationship;
+			$model->bindModel(array('hasOne' => array('Page'=>$pageRelationship)), false);
 		}
-		if ($this->languages) {
-			foreach ($this->languages as $locale) {
+		if (isset($this->runtime[$model->alias]['languages']) && $languages = $this->runtime[$model->alias]['languages']) {
+			foreach ($languages as $locale) {
 				$alias = 'Page_'.$locale;
-				$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array($alias.'.page_number' => 1, $alias.'.model'=>$Model->name, $alias.'.locale'=>$locale)), $settings);
-				$Model->bindModel(array('hasOne' => array($alias=>$pageRelationship)), false);
+				$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array($alias.'.page_number' => 1, $alias.'.model'=>$model->name, $alias.'.locale'=>$locale)), $settings);
+				$model->bindModel(array('hasOne' => array($alias=>$pageRelationship)), false);
 			}
 		}
-		if (!isset($Model->hasMany['Translations'])) {
-			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array('Translation.model' => $Model->name)), $settings);
-			$Model->bindModel(array('hasMany' => array('Translation'=>$pageRelationship)), false);
+		if (!isset($model->hasMany['Translations'])) {
+			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array('Translation.model' => $model->name)), $settings);
+			$model->bindModel(array('hasMany' => array('Translation'=>$pageRelationship)), false);
 		}		
 	}
 	function getLocale(&$model) {
 		$locale = isset($model->locale) ? $model->locale : Configure::read('Config.locale');
 		if (!is_array($locale)) 
-			$locale = array($locale, @$this->languages[0]);
+			$locale = array($locale, @$this->runtime[$model->alias]['languages'][0]);
 		else {
-			$locale[] = @$this->languages[0];
+			$locale[] = @$this->runtime[$model->alias]['languages'][0];
 		}
 		return array_unique($locale);
 	}
-	function beforeFind(&$model, $query) {
+	function beforeFind(&$model, $query, $isChild = false) {
+		if($isChild) {
+			$_query = array('contain'=>$query);
+			$query = $_query;
+		}
 		$aliases = array();
-		if ($this->languages) {
+		if ($this->runtime[$model->alias]['languages']) {
 			$locale = $this->getLocale(&$model);
 			foreach ($locale as $_locale) {
 				$aliases[] = 'Page_'.$_locale;
@@ -93,47 +100,55 @@ class HasPageBehavior extends ModelBehavior {
 
 		if ($model->findQueryType == 'list') { 
 			if(count($virtualFields)) {
-				$model->Behaviors->attach('Containable');
-				$query['recursive'] = 1;
-				$query['contain'] = array();
-				foreach($aliases as $alias) {
-					$query['contain'][$alias] = array('title');
-				}
-				
+				$query = $this->_addChild($model, $query, $aliases, array('title'), $isChild);
 			}
 		} elseif (in_array($model->findQueryType, array('first', 'all'))) {
 			if (!isset($query['recursive']) || (isset($query['recursive']) && $query['recursive'] > -1)) {
-				$model->Behaviors->attach('Containable');
-				$query['recursive'] = 1;
-				if(!isset($query['contain'])) {
-					$query['contain'] = array();
-				}
 				$fields = false;
 
-				if (array_key_exists('Page', $query['contain'])) {
+				if (isset($query['contain']['Page'])) {
 					$fields = $query['contain']['Page'];
 					unset($query['contain']['Page']);
-				} elseif (in_array('Page', $query['contain'])) {
+				} elseif (isset($query['contain']) && in_array('Page', $query['contain'])) {
 					$key = array_search('Page', $query['contain']);
 					unset($query['contain'][$key]);
 				}
 
 				foreach($aliases as $alias) {
 					if ($fields) {
-						$query['contain'][$alias] = $fields;
+						$query = $this->_addChild($model, $query, $aliases, $fields, $isChild);
 					} else {
-						array_unshift($query['contain'], $alias);
+						$query = $this->_addChild($model, $query, $aliases, array(), $isChild);
 					}
 				}
-				$model->contain($query['contain']);
+				
+				
+				//$model->contain($query['contain']);
 			}
 		}
+		if(isset($query['contain'])) {
+			foreach ($query['contain'] as $key => $value) {
+				if (is_numeric($key)) {
+					$key = $value;
+					$value = array();
+				}
+				if (in_array($key, array_keys($this->runtime))) {
+					$model->$key->findQueryType = count($value) ? 'all' : 'list';
+					$query['contain'][$key] = $this->beforeFind(&$model->$key, $value, true);
+				}
+			}
+		}
+		if($isChild) {
+			$query = $query['contain'];
+		}
+		pr($query);
 		return $query;
 	}
 	function afterFind(&$model, $results, $primary) {
 		$virtualFields = $this->runtime[$model->alias]['virtualFields'];
+		$languages = $this->runtime[$model->alias]['languages'];
 		$model->virtualFields = array_merge($model->virtualFields, $virtualFields);
-		if (!$this->languages || empty($results)) {//|| empty($this->runtime[$model->alias]['beforeFind'])
+		if (!$languages || empty($results)) {//|| empty($this->runtime[$model->alias]['beforeFind'])
 			return $results;
 		}
 		$locale = $this->getLocale(&$model);
@@ -192,6 +207,25 @@ class HasPageBehavior extends ModelBehavior {
 				$model->data['Translation'][$i]['model'] = $model->alias;
 			}
 		}
+	}
+	
+	function _addChild($model, $query, $aliases, $fields = array('title'), $isChild = false) {
+		$out = array();
+		foreach($aliases as $alias) {
+			$out[$alias] = $fields;
+		}
+		if(!$isChild) {
+			$model->Behaviors->attach('Containable');
+			if(!isset($query['recursive']) || $query['recursive'] < 1) {
+				$query['recursive'] = 1;
+			}
+		}
+		if (!isset($query['contain'])) {
+			$query['contain'] = array();
+		}
+		$query['contain'] = array_merge($query['contain'], $out);
+			//$model->contain($query['contain']);
+		return $query;
 	}
 }
 ?>
