@@ -190,6 +190,9 @@ class HasPageBehavior extends ModelBehavior {
 		foreach($virtualFields as $key => $virtualField) {
 			list($alias, $field) = pluginSplit($virtualField);
 			foreach($results as $i=>$result) {
+				if(!is_array($result)) {
+					continue;
+				}
 				$keep = isset($result[$alias][$field]) ? $result[$alias][$field] : null;
 				if ($keep) {
 					$results[$i][$model->alias][$key] = $keep;
@@ -203,6 +206,9 @@ class HasPageBehavior extends ModelBehavior {
 		$fields = array_unique($this->runtime[$model->alias]['fields']);
 
 		foreach($results as $i => $result) {
+			if(!is_array($result)) {
+				continue;
+			}
 			$found = false;
 			foreach ($fields as $_field => $_translations) {
 				foreach ($_translations as $_found) {
