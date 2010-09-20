@@ -8,9 +8,6 @@ class HasPageBehavior extends ModelBehavior {
 			'conditions' => array(),
 	);
 	function setup(&$model, $settings = array()) {
-	//	if (!isset($this->runtime[$model->alias])) {
-	//		$this->runtime[$model->alias] = am(array('display' => ''), $settings);
-	//	}
 		if ($model->displayField == 'id') {
 			$model->displayField = 'display';
 			$model->virtualFields['display'] = 'Page.title';
@@ -56,6 +53,9 @@ class HasPageBehavior extends ModelBehavior {
 			$query = $_query;
 		}
 		$aliases = array();
+		
+		//pr(array($model->findQueryType, $query));
+		
 		if ($this->runtime[$model->alias]['languages']) {
 			$locale = $this->getLocale(&$model);
 			foreach ($locale as $_locale) {
@@ -79,6 +79,9 @@ class HasPageBehavior extends ModelBehavior {
 		}
 		$fields = array();
 		if(isset($query['fields']) && ($model->findQueryType != 'count')) {
+			if(!is_array($query['fields'])) {
+				$query['fields'] = array($query['fields']);
+			}
 			foreach ($query['fields'] as $i => $field) {
 				list($_model, $_field) = pluginSplit($field);
 				if (in_array($_field, array_keys($virtualFields)) && ($_model == $model->alias)) {
@@ -121,8 +124,6 @@ class HasPageBehavior extends ModelBehavior {
 						$query = $this->_addChild($model, $query, $aliases, array(), $isChild);
 					}
 				}
-				
-				
 				//$model->contain($query['contain']);
 			}
 		}
@@ -165,7 +166,6 @@ class HasPageBehavior extends ModelBehavior {
 			}
 		}
 		$locale = $this->getLocale(&$model);
-
 		foreach ($results as $i => $result) {
 			if(!is_array($result)) {
 				continue;
@@ -221,15 +221,6 @@ class HasPageBehavior extends ModelBehavior {
 			}
 		}
 		return $results;
-	}
-	function beforeValidate(&$model, $created) {
-		if (isset($model->data['Page'])) {
-			$model->data['Page']['model'] = $model->alias;
-		} elseif(isset($model->data['Translation'])) {
-			foreach ($model->data['Translation'] as $i => $content) {
-				$model->data['Translation'][$i]['model'] = $model->alias;
-			}
-		}
 	}
 	
 	function _addChild($model, $query, $aliases, $fields = array('title'), $isChild = false) {
