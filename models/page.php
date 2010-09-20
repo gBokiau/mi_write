@@ -92,7 +92,7 @@ class Page extends MiWriteAppModel {
  * @var string 'Page.created DESC'
  * @access public
  */
-	public $order = 'Page.created DESC';
+//	public $order = 'created DESC';
 
 /**
  * validate property
