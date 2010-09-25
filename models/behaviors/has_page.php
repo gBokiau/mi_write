@@ -34,7 +34,7 @@ class HasPageBehavior extends ModelBehavior {
 			}
 		}
 		if (!isset($model->hasMany['Translations'])) {
-			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array('Translation.model' => $model->name)), $settings);
+			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array('Translation.page_number' => 1, 'Translation.model' => $model->name)), $settings);
 			$model->bindModel(array('hasMany' => array('Translation'=>$pageRelationship)), false);
 		}		
 	}
