@@ -334,4 +334,10 @@ class Page extends MiWriteAppModel {
 		}
 		parent::updateCounterCache();
 	}
+	
+	public function beforeValidate() {
+		if(empty($this->data[$this->alias][$this->displayField]) && empty($this->data[$this->alias]['intro'])&& empty($this->data[$this->alias]['body'])) {
+			$this->data = null;
+		}
+	}
 }

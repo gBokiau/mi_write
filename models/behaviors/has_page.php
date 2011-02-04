@@ -36,7 +36,7 @@ class HasPageBehavior extends ModelBehavior {
 		if (!isset($model->hasMany['Translations'])) {
 			$pageRelationship = Set::merge($this->_defaultSettings, array('conditions' => array('Translation.model' => $model->name)), $settings);
 			$model->bindModel(array('hasMany' => array('Translation'=>$pageRelationship)), false);
-		}		
+		}
 	}
 	function getLocale(&$model) {
 		$locale = isset($model->locale) ? $model->locale : Configure::read('Config.locale');
@@ -47,6 +47,7 @@ class HasPageBehavior extends ModelBehavior {
 		}
 		return array_unique($locale);
 	}
+	
 	function beforeFind(&$model, $query, $isChild = false) {
 		if($isChild) {
 			$_query = array('contain'=>$query);
